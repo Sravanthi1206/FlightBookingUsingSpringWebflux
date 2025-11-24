@@ -3,6 +3,7 @@ package com.flightapp.service;
 import com.flightapp.dto.BookingRequest;
 import com.flightapp.dto.BookingResponse;
 import com.flightapp.dto.Passenger;
+import com.flightapp.exception.NotFoundException;
 import com.flightapp.model.Booking;
 import com.flightapp.model.enums.BookingStatus;
 import com.flightapp.repository.BookingRepository;
@@ -83,5 +84,19 @@ public class BookingService {
 
     private String generatePnr() {
         return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+    
+    public Mono<Void> cancelBooking(String pnr) {
+        return bookingRepo.findByPnr(pnr)
+                .switchIfEmpty(Mono.error(new NotFoundException("Booking not found")))
+                .flatMap(booking -> {
+                    // If already cancelled, just complete
+                    if (booking.getStatus() == BookingStatus.CANCELLED) {
+                        return Mono.empty();
+                    }
+                    booking.setStatus(BookingStatus.CANCELLED);
+                    booking.setUpdatedAt(Instant.now());
+                    return bookingRepo.save(booking).then();
+                });
     }
 }
