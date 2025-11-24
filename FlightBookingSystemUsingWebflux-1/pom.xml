@@ -18,14 +18,7 @@
     <java.version>17</java.version>
 
     <sonar.organization>Sravanthi1206</sonar.organization>
-    
-    <!-- Fix Quality Gate -->
-    <sonar.newCode.referenceBranch>master</sonar.newCode.referenceBranch>
-    <sonar.leak.period>previous_version</sonar.leak.period>
 
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
 </properties>
 
     <dependencies>
