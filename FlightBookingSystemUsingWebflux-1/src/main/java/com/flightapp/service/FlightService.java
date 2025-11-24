@@ -15,13 +15,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class FlightService {
 
-    private final FlightRepository repo;
+    private final FlightRepository flightRepository;
 
-    public Mono<FlightResponse> addFlight(AddFlightRequest req) {
+    public Mono<String> addFlight(AddFlightRequest req) {
 
         int duration = (int) ((req.getArrivalTime().toEpochMilli() - req.getDepartureTime().toEpochMilli()) / 60000);
 
-        Flight f = Flight.builder()
+        Flight flight = Flight.builder()
                 .flightNumber(req.getFlightNumber())
                 .airlineId(req.getAirlineId())
                 .origin(req.getOrigin())
@@ -34,11 +34,13 @@ public class FlightService {
                 .baseFare(req.getBaseFare())
                 .build();
 
-        return repo.save(f).map(this::toResponse);
+        return flightRepository.save(flight)
+                .map(Flight::getId); 
     }
 
+
     public Flux<FlightResponse> searchFlights(SearchFlightsRequest req) {
-        return repo.findByOriginAndDestination(req.getOrigin(), req.getDestination())
+        return flightRepository.findByOriginAndDestination(req.getOrigin(), req.getDestination())
                 .map(this::toResponse);
     }
 
@@ -59,7 +61,7 @@ public class FlightService {
     }
     
     public Mono<FlightResponse> getFlight(String id) {
-        return repo.findById(id)
+        return flightRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Flight not found")))
                 .map(flight -> FlightResponse.builder()
                         .id(flight.getId())
@@ -76,5 +78,6 @@ public class FlightService {
                         .aircraftType(flight.getAircraftType())
                         .build());
     }
+
 
 }

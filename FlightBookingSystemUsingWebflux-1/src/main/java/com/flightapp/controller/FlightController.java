@@ -20,9 +20,9 @@ public class FlightController {
     private final FlightService flightService;
 
     @PostMapping("/add")
-    public Mono<ResponseEntity<FlightResponse>> addFlight(@Valid @RequestBody AddFlightRequest req) {
+    public Mono<ResponseEntity<String>> addFlight(@Valid @RequestBody AddFlightRequest req) {
         return flightService.addFlight(req)
-                .map(resp -> ResponseEntity.status(HttpStatus.CREATED).body(resp));
+                .map(id -> ResponseEntity.status(HttpStatus.CREATED).body(id));
     }
 
     @PostMapping("/search")
