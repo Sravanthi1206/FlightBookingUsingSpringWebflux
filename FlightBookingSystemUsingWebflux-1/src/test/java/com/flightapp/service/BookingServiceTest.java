@@ -116,6 +116,62 @@ class BookingServiceTest {
                     assert err.getMessage().contains("Not enough seats");
                 }).verify();
     }
+    
+    @Test
+    void createBooking_duplicateKey_retriesAndSucceeds() {
+
+        // ---- Build a VALID BookingRequest ----
+        PassengerDTO p = new PassengerDTO();
+        p.setName("Alice");
+        p.setAge(25);
+
+        BookingRequest req = new BookingRequest();
+        req.setFlightId("F1");
+        req.setSeatNumbers(List.of("1A", "1B"));
+        req.setAmountPaid(500.0);
+        req.setEmailId("test@example.com");
+        req.setPassengers(List.of(p));
+
+        // ---- Mock Flight update (seat decrement) ----
+        Flight updatedFlight = new Flight();
+        updatedFlight.setId("F1");
+
+        when(mongoTemplate.findAndModify(any(), any(), any(), eq(Flight.class)))
+                .thenReturn(Mono.just(updatedFlight));
+
+        // ---- PNR generator must return DIFFERENT PNRs ----
+        when(pnrGenerator.generate())
+                .thenReturn("PNR1")   // first attempt → collision
+                .thenReturn("PNR2");  // retry → success
+
+        // ---- Mock final successful booking save ----
+        Booking saved = Booking.builder()
+                .pnr("PNR2")  // must match retry PNR
+                .flightId("F1")
+                .seatNumbers(List.of("1A", "1B"))
+                .amountPaid(500.0)
+                .emailId("test@example.com")
+                .status(BookingStatus.CONFIRMED)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .passengers(List.of(
+                        Passenger.builder().name("Alice").age(25).build()
+                ))
+                .build();
+
+        // ---- FIRST save throws DuplicateKey → SECOND save succeeds ----
+        when(bookingRepo.save(any()))
+                .thenReturn(Mono.error(new DuplicateKeyException("dup")))
+                .thenReturn(Mono.just(saved));
+
+        // ---- VERIFY ----
+        StepVerifier.create(bookingService.createBooking(req))
+                .expectNext("PNR2")
+                .verifyComplete();
+
+        verify(bookingRepo, times(2)).save(any());
+    }
+
 
 
     @Test
