@@ -18,10 +18,11 @@ public class AirlineController {
     private final AirlineService airlineService;
 
     @PostMapping
-    public Mono<ResponseEntity<AirlineResponse>> addAirline(@Valid @RequestBody AddAirlineRequest req) {
+    public Mono<ResponseEntity<String>> addAirline(@Valid @RequestBody AddAirlineRequest req) {
         return airlineService.addAirline(req)
-                .map(resp -> ResponseEntity.status(HttpStatus.CREATED).body(resp));
+                .map(id -> ResponseEntity.status(HttpStatus.CREATED).body(id));
     }
+
 
     @GetMapping("/{id}")
     public Mono<ResponseEntity<AirlineResponse>> getAirline(@PathVariable String id) {

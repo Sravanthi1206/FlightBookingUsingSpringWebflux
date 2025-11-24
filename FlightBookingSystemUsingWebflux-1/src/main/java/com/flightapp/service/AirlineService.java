@@ -13,25 +13,21 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AirlineService {
 
-    private final AirlineRepository repo;
+    private final AirlineRepository airlineRepository;
 
-    public Mono<AirlineResponse> addAirline(AddAirlineRequest req) {
+    public Mono<String> addAirline(AddAirlineRequest req) {
+        Airline airline = new Airline();
+        airline.setAirlineCode(req.getAirlineCode());
+        airline.setAirlineName(req.getAirlineName());
+        airline.setLogoUrl(null); 
 
-        Airline airline = Airline.builder()
-                .airlineCode(req.getAirlineCode())
-                .airlineName(req.getAirlineName())
-                .build();
-
-        return repo.save(airline)     
-                .map(saved -> AirlineResponse.builder()
-                        .id(saved.getId())
-                        .airlineCode(saved.getAirlineCode())
-                        .airlineName(saved.getAirlineName())
-                        .build());
+        return airlineRepository.save(airline)
+                .map(Airline::getId); 
     }
+
     
     public Mono<AirlineResponse> getAirline(String id) {
-        return repo.findById(id)
+        return airlineRepository.findById(id)
                 .switchIfEmpty(Mono.error(new NotFoundException("Airline not found")))
                 .map(a -> AirlineResponse.builder()
                         .id(a.getId())
