@@ -2,10 +2,11 @@ package com.flightapp.controller;
 
 import com.flightapp.dto.BookingRequest;
 import com.flightapp.dto.BookingResponse;
-import com.flightapp.dto.CancelBookingRequest;
+import com.flightapp.exception.NotFoundException;
 import com.flightapp.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,16 +21,17 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public Mono<ResponseEntity<BookingResponse>> createBooking(@Valid @RequestBody BookingRequest req) {
+    public Mono<ResponseEntity<String>> createBooking(@Valid @RequestBody BookingRequest req) {
         return bookingService.createBooking(req)
-                .map(resp -> ResponseEntity.status(HttpStatus.CREATED).body(resp));
+                .map(pnr -> ResponseEntity.status(HttpStatus.CREATED).body(pnr));
     }
+
 
     @GetMapping("/{pnr}")
     public Mono<ResponseEntity<BookingResponse>> getBooking(@PathVariable String pnr) {
         return bookingService.getBooking(pnr)
-                .map(r -> ResponseEntity.ok(r))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
     @GetMapping("/history")
@@ -38,9 +40,9 @@ public class BookingController {
     }
 
     @DeleteMapping("/{pnr}")
-    public Mono<ResponseEntity<Void>> cancelBooking(@PathVariable String pnr,
-                                                    @Valid @RequestBody(required = false) CancelBookingRequest req) {
+    public Mono<ResponseEntity<Void>> cancelBooking(@PathVariable String pnr) {
         return bookingService.cancelBooking(pnr)
-                .thenReturn(ResponseEntity.noContent().<Void>build());
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 }

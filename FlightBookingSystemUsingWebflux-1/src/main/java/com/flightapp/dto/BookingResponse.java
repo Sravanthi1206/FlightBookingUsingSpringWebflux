@@ -16,6 +16,6 @@ public class BookingResponse {
     private Double amountPaid;
     private String emailId;
     private String status;
-    private List<Passenger> passengers;
+    private List<PassengerDTO> passengers;
     private Instant createdAt;
 }

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-public class Passenger {
+public class PassengerDTO {
 
     @NotBlank
     private String name;

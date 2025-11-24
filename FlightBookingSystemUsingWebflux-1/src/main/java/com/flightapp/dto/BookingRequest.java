@@ -24,5 +24,5 @@ public class BookingRequest {
     private Double amountPaid;
 
     @NotEmpty
-    private List<@Valid Passenger> passengers;
+    private List<@Valid PassengerDTO> passengers;
 }
