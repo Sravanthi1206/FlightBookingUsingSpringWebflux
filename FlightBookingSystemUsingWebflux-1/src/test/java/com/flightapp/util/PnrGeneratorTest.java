@@ -1,6 +1,7 @@
 package com.flightapp.util;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PnrGeneratorTest {
 
@@ -10,10 +11,10 @@ class PnrGeneratorTest {
     void generate_returns8UppercaseCharacters() {
         String pnr = generator.generate();
 
-        assert pnr != null;
-        assert pnr.length() == 8;
-        assert pnr.equals(pnr.toUpperCase());
-        assert pnr.matches("[A-Z0-9]+");
+        assertNotNull(pnr);
+        assertEquals(8, pnr.length());
+        assertEquals(pnr.toUpperCase(), pnr);
+        assertTrue(pnr.matches("[A-Z0-9]+"));
     }
 
     @Test
@@ -21,6 +22,6 @@ class PnrGeneratorTest {
         String p1 = generator.generate();
         String p2 = generator.generate();
 
-        assert !p1.equals(p2);
+        assertNotEquals(p1, p2);
     }
 }

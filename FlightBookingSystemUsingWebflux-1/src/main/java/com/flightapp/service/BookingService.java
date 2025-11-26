@@ -9,7 +9,6 @@ import com.flightapp.model.Flight;
 import com.flightapp.model.Passenger;
 import com.flightapp.model.enums.BookingStatus;
 import com.flightapp.repository.BookingRepository;
-import com.flightapp.repository.FlightRepository;
 import com.flightapp.util.PnrGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -31,16 +30,17 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final BookingRepository bookingRepo;
-    private final FlightRepository flightRepo;
     private final ReactiveMongoTemplate mongoTemplate;
     private final PnrGenerator pnrGenerator;
+    
+    private static final String FIELD_AVAILABLE_SEATS = "availableSeats";
 
     public Mono<String> createBooking(BookingRequest req) {
     int seatsRequested = req.getSeatNumbers().size();
 
     Query q = Query.query(Criteria.where("_id").is(req.getFlightId())
-            .and("availableSeats").gte(seatsRequested));
-    Update u = new Update().inc("availableSeats", -seatsRequested);
+            .and(FIELD_AVAILABLE_SEATS).gte(seatsRequested));
+    Update u = new Update().inc(FIELD_AVAILABLE_SEATS, -seatsRequested);
 
     return mongoTemplate.findAndModify(q, u, FindAndModifyOptions.options().returnNew(true), Flight.class)
             .switchIfEmpty(Mono.error(new RuntimeException("Not enough seats available")))
@@ -95,7 +95,7 @@ public class BookingService {
                     return bookingRepo.save(b)
                             .then(mongoTemplate.findAndModify(
                                     Query.query(Criteria.where("_id").is(b.getFlightId())),
-                                    new Update().inc("availableSeats", seatsToRestore),
+                                    new Update().inc(FIELD_AVAILABLE_SEATS, seatsToRestore),
                                     FindAndModifyOptions.options().returnNew(true),
                                     Flight.class
                             ).then());
@@ -132,3 +132,4 @@ public class BookingService {
                 .build();
     }
 }
+
