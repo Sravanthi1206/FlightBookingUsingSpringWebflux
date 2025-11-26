@@ -27,7 +27,7 @@ public class AirlineController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<AirlineResponse>> getAirline(@PathVariable String id) {
         return airlineService.getAirline(id)
-                .map(resp -> ResponseEntity.ok(resp))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
