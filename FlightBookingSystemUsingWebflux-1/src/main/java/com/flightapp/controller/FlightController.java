@@ -33,7 +33,7 @@ public class FlightController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<FlightResponse>> getFlight(@PathVariable String id) {
         return flightService.getFlight(id)
-                .map(r -> ResponseEntity.ok(r))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

@@ -1,8 +1,6 @@
 package com.flightapp.service;
 
 import com.flightapp.dto.AddFlightRequest;
-import com.flightapp.dto.FlightResponse;
-import com.flightapp.dto.SearchFlightsRequest;
 import com.flightapp.exception.NotFoundException;
 import com.flightapp.model.Flight;
 import com.flightapp.repository.FlightRepository;
@@ -10,13 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Instant;
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 

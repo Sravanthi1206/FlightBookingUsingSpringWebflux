@@ -23,7 +23,7 @@ public class SeatController {
     @GetMapping("/{seatNumber}")
     public Mono<ResponseEntity<Seat>> getSeat(@PathVariable String flightId, @PathVariable String seatNumber) {
         return seatService.getSeat(flightId, seatNumber)
-                .map(s -> ResponseEntity.ok(s))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
